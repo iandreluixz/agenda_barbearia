@@ -1,17 +1,121 @@
 const form = document.querySelector("#booking-form");
+const emailInput = document.querySelector("#customer-email");
+const emailError = document.querySelector("#email-error");
 const serviceSelect = document.querySelector("#service");
-const professionalSelect = document.querySelector("#professional");
+const serviceTrigger = document.querySelector("#service-trigger");
+const serviceLabel = document.querySelector("#selected-service-label");
+const serviceOptions = document.querySelector("#service-options");
+const professionalOptions = document.querySelector("#professional-options");
 const dateInput = document.querySelector("#appointment-date");
+const dateTrigger = document.querySelector("#date-trigger");
+const dateCalendar = document.querySelector("#date-calendar");
+const selectedWeekday = document.querySelector("#selected-weekday");
+const selectedDateLabel = document.querySelector("#selected-date");
+const calendarMonthLabel = document.querySelector("#calendar-month");
+const calendarDays = document.querySelector("#calendar-days");
+const previousMonthButton = document.querySelector("#previous-month");
+const nextMonthButton = document.querySelector("#next-month");
 const slotsContainer = document.querySelector("#time-slots");
 const message = document.querySelector("#form-message");
 let selectedSlot = null;
+let selectedService = null;
 
-const today = new Date();
-const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60_000)
-  .toISOString()
-  .slice(0, 10);
-dateInput.min = localDate;
-dateInput.value = localDate;
+function dateToValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function dateFromValue(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function getFirstAvailableDate() {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  if (date.getDay() === 0) date.setDate(date.getDate() + 1);
+  return date;
+}
+
+const todayValue = dateToValue(new Date());
+let selectedDate = getFirstAvailableDate();
+let displayedMonth = new Date(
+  selectedDate.getFullYear(),
+  selectedDate.getMonth(),
+  1,
+  12,
+);
+
+function updateDateDisplay() {
+  dateInput.value = dateToValue(selectedDate);
+  selectedWeekday.textContent = selectedDate.toLocaleDateString("pt-BR", {
+    weekday: "long",
+  });
+  selectedDateLabel.textContent = selectedDate.toLocaleDateString("pt-BR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function renderCalendar() {
+  calendarMonthLabel.textContent = displayedMonth.toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+  });
+  const currentMonth = new Date();
+  currentMonth.setDate(1);
+  currentMonth.setHours(12, 0, 0, 0);
+  previousMonthButton.disabled = displayedMonth <= currentMonth;
+  calendarDays.replaceChildren();
+
+  const year = displayedMonth.getFullYear();
+  const month = displayedMonth.getMonth();
+  const firstDayOffset = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for (let index = 0; index < firstDayOffset; index += 1) {
+    const emptyCell = document.createElement("span");
+    emptyCell.className = "calendar-empty";
+    emptyCell.setAttribute("aria-hidden", "true");
+    calendarDays.append(emptyCell);
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = new Date(year, month, day, 12);
+    const dateValue = dateToValue(date);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "calendar-day";
+    button.setAttribute("role", "gridcell");
+    button.textContent = String(day);
+    button.setAttribute("aria-label", date.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }));
+    button.setAttribute("aria-pressed", String(dateValue === dateInput.value));
+    button.disabled = dateValue < todayValue || date.getDay() === 0;
+    if (dateValue === todayValue) button.classList.add("is-today");
+    if (date.getDay() === 0) button.classList.add("is-closed");
+    button.addEventListener("click", () => {
+      selectedDate = date;
+      updateDateDisplay();
+      renderCalendar();
+      dateCalendar.hidden = true;
+      dateTrigger.setAttribute("aria-expanded", "false");
+      showMessage("");
+      void loadTimeSlots();
+    });
+    calendarDays.append(button);
+  }
+}
+
+updateDateDisplay();
+renderCalendar();
 
 async function loadOptions() {
   const [servicesResponse, professionalsResponse] = await Promise.all([
@@ -39,23 +143,161 @@ async function loadOptions() {
     professionalsResponse.json(),
   ]);
 
-  serviceSelect.innerHTML = '<option value="">Selecione um serviço</option>';
+  serviceOptions.replaceChildren();
   for (const service of services) {
-    const option = document.createElement("option");
-    option.value = service.id;
-    option.textContent = `${service.name} · ${service.duration_minutes} min · ${(service.price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`;
-    serviceSelect.append(option);
+    const option = document.createElement("button");
+    option.className = "service-option";
+    option.type = "button";
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", "false");
+
+    const details = document.createElement("span");
+    details.className = "service-option-details";
+    const name = document.createElement("strong");
+    name.textContent = service.name;
+    const description = document.createElement("span");
+    description.textContent = `${service.duration_minutes} minutos`;
+    details.append(name, description);
+
+    const price = document.createElement("span");
+    price.className = "service-option-price";
+    price.textContent = (service.price_cents / 100).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+    option.append(details, price);
+    option.addEventListener("click", () => {
+      selectedService = service;
+      serviceSelect.value = String(service.id);
+      serviceLabel.textContent = `${service.name} · ${service.duration_minutes} min · ${price.textContent}`;
+      serviceTrigger.setAttribute("aria-expanded", "false");
+      serviceOptions.hidden = true;
+      serviceOptions
+        .querySelectorAll(".service-option")
+        .forEach((item) => item.setAttribute("aria-selected", "false"));
+      option.setAttribute("aria-selected", "true");
+      showMessage("");
+      void loadTimeSlots();
+    });
+    serviceOptions.append(option);
   }
 
-  professionalSelect.innerHTML =
-    '<option value="">Selecione um barbeiro</option>';
-  for (const professional of professionals) {
-    const option = document.createElement("option");
-    option.value = professional.id;
-    option.textContent = professional.name;
-    professionalSelect.append(option);
-  }
+  serviceLabel.textContent = services.length
+    ? "Toque para ver os serviços e valores"
+    : "Nenhum serviço cadastrado";
+
+  professionalOptions.replaceChildren();
+  const barberPhotos = [
+    "/images/barbeiro-ilustracao-1.svg",
+    "/images/barbeiro-ilustracao-2.svg",
+  ];
+  professionals.forEach((professional, index) => {
+    const card = document.createElement("label");
+    card.className = "professional-card";
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "professionalId";
+    radio.value = professional.id;
+    radio.required = true;
+
+    const image = document.createElement("img");
+    image.src = barberPhotos[index % barberPhotos.length];
+    image.alt = "";
+    image.loading = "lazy";
+
+    const name = document.createElement("strong");
+    name.textContent = professional.name;
+    const note = document.createElement("span");
+    note.textContent = "Ilustração fictícia";
+
+    const details = document.createElement("span");
+    details.className = "professional-card-details";
+    details.append(name, note);
+    card.append(radio, image, details);
+    radio.addEventListener("change", () => {
+      showMessage("");
+      void loadTimeSlots();
+    });
+    professionalOptions.append(card);
+  });
 }
+
+serviceTrigger.addEventListener("click", () => {
+  const isExpanded = serviceTrigger.getAttribute("aria-expanded") === "true";
+  serviceTrigger.setAttribute("aria-expanded", String(!isExpanded));
+  serviceOptions.hidden = isExpanded;
+});
+
+serviceOptions.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    serviceTrigger.setAttribute("aria-expanded", "false");
+    serviceOptions.hidden = true;
+    serviceTrigger.focus();
+  }
+});
+
+dateTrigger.addEventListener("click", () => {
+  const isExpanded = dateTrigger.getAttribute("aria-expanded") === "true";
+  if (!isExpanded) {
+    displayedMonth = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      1,
+      12,
+    );
+    renderCalendar();
+  }
+  dateTrigger.setAttribute("aria-expanded", String(!isExpanded));
+  dateCalendar.hidden = isExpanded;
+});
+
+previousMonthButton.addEventListener("click", () => {
+  displayedMonth.setMonth(displayedMonth.getMonth() - 1);
+  renderCalendar();
+});
+
+nextMonthButton.addEventListener("click", () => {
+  displayedMonth.setMonth(displayedMonth.getMonth() + 1);
+  renderCalendar();
+});
+
+dateCalendar.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    dateCalendar.hidden = true;
+    dateTrigger.setAttribute("aria-expanded", "false");
+    dateTrigger.focus();
+  }
+});
+
+emailInput.addEventListener("invalid", () => {
+  const error = emailInput.validity.valueMissing
+    ? "Informe seu endereço de e-mail."
+    : "Esse e-mail parece inválido. Confira o endereço e tente novamente.";
+  emailInput.setCustomValidity(error);
+  emailError.textContent = error;
+});
+
+emailInput.addEventListener("input", () => {
+  emailInput.setCustomValidity("");
+  emailError.textContent = "";
+});
+
+document.addEventListener("click", (event) => {
+  if (
+    !serviceTrigger.contains(event.target) &&
+    !serviceOptions.contains(event.target)
+  ) {
+    serviceTrigger.setAttribute("aria-expanded", "false");
+    serviceOptions.hidden = true;
+  }
+  if (
+    !dateTrigger.contains(event.target) &&
+    !dateCalendar.contains(event.target)
+  ) {
+    dateTrigger.setAttribute("aria-expanded", "false");
+    dateCalendar.hidden = true;
+  }
+});
 
 function showMessage(text, isSuccess = false) {
   message.textContent = text;
@@ -71,8 +313,11 @@ function getLocalDateTime(date, minutes) {
 async function loadTimeSlots() {
   slotsContainer.replaceChildren();
   selectedSlot = null;
+  const selectedProfessional = form.querySelector(
+    'input[name="professionalId"]:checked',
+  );
 
-  if (!serviceSelect.value || !professionalSelect.value || !dateInput.value) {
+  if (!selectedService || !selectedProfessional || !dateInput.value) {
     slotsContainer.innerHTML =
       '<p class="slots-hint">Escolha o serviço, o barbeiro e o dia.</p>';
     return;
@@ -90,17 +335,14 @@ async function loadTimeSlots() {
   const params = new URLSearchParams({
     from: dayStart.toISOString(),
     to: dayEnd.toISOString(),
-    professionalId: professionalSelect.value,
+    professionalId: selectedProfessional.value,
   });
 
   try {
     const response = await fetch(`/api/appointments?${params}`);
     if (!response.ok) throw new Error("Falha ao consultar horários.");
     const appointments = await response.json();
-    const duration = Number(
-      serviceSelect.selectedOptions[0].dataset.duration ??
-        serviceSelect.selectedOptions[0].textContent.match(/· (\d+) min/)?.[1],
-    );
+    const duration = Number(selectedService.duration_minutes);
     const now = new Date();
     slotsContainer.replaceChildren();
 
@@ -143,7 +385,7 @@ async function loadTimeSlots() {
   }
 }
 
-for (const field of [serviceSelect, professionalSelect, dateInput]) {
+for (const field of [dateInput]) {
   field.addEventListener("change", () => {
     showMessage("");
     void loadTimeSlots();
@@ -152,6 +394,24 @@ for (const field of [serviceSelect, professionalSelect, dateInput]) {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!dateInput.value) {
+    showMessage("Escolha o dia do corte.");
+    dateTrigger.focus();
+    return;
+  }
+  if (!selectedService) {
+    showMessage("Escolha um serviço para continuar.");
+    serviceTrigger.focus();
+    return;
+  }
+  const selectedProfessional = form.querySelector(
+    'input[name="professionalId"]:checked',
+  );
+  if (!selectedProfessional) {
+    showMessage("Escolha o barbeiro que vai atender você.");
+    professionalOptions.querySelector('input[name="professionalId"]')?.focus();
+    return;
+  }
   if (!selectedSlot) {
     showMessage("Escolha um dos horários disponíveis.");
     return;
@@ -168,8 +428,8 @@ form.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         customerName: form.elements.customerName.value,
         customerEmail: form.elements.customerEmail.value,
-        professionalId: Number(professionalSelect.value),
-        serviceId: Number(serviceSelect.value),
+        professionalId: Number(selectedProfessional.value),
+        serviceId: Number(selectedService.id),
         startsAt: selectedSlot.toISOString(),
       }),
     });
@@ -183,7 +443,21 @@ form.addEventListener("submit", async (event) => {
       true,
     );
     form.reset();
-    dateInput.value = localDate;
+    selectedDate = getFirstAvailableDate();
+    displayedMonth = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      1,
+      12,
+    );
+    updateDateDisplay();
+    renderCalendar();
+    selectedService = null;
+    serviceSelect.value = "";
+    serviceLabel.textContent = "Toque para ver os serviços e valores";
+    serviceOptions
+      .querySelectorAll(".service-option")
+      .forEach((option) => option.setAttribute("aria-selected", "false"));
     selectedSlot = null;
     await loadTimeSlots();
   } catch (error) {

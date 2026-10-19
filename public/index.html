@@ -3,31 +3,36 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#17241e" />
-    <title>Agenda — Barbearia</title>
+    <meta name="theme-color" content="#151413" />
+    <title>Ateliê Barbearia — Agende seu corte</title>
     <link rel="stylesheet" href="/styles.css" />
     <script src="/app.js" defer></script>
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="/" aria-label="Agenda da barbearia">
-        <span class="brand-mark" aria-hidden="true">A</span>
+      <a class="brand" href="/" aria-label="Ateliê Barbearia — início">
+        <img class="brand-logo" src="/images/logo-barbearia.svg" alt="" />
         <span>ATELIÊ <strong>BARBEARIA</strong></span>
       </a>
-      <a class="topbar-link" href="#agendar">Marque seu horário <span aria-hidden="true">↗</span></a>
+      <div class="topbar-actions">
+        <a class="whatsapp-link" href="https://wa.me/5535999999999?text=Ol%C3%A1%21%20Quero%20saber%20sobre%20um%20hor%C3%A1rio." target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.7a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.5-4.9a8.4 8.4 0 1 1 16-3.9ZM8.4 7.8c-.2-.5-.4-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.1 1.1-1.1 2.6s1.1 3 1.2 3.2c.2.2 2.1 3.4 5.2 4.6 2.6 1 3.1.8 3.7.8.6-.1 1.9-.8 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.4l-2-1c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.4.3-.7.1-.4-.2-1.4-.5-2.6-1.6-1-.8-1.6-1.8-1.8-2.1-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-.9-2Z"/></svg>
+          WhatsApp <span class="demo-number">(35) 99999-9999</span>
+        </a>
+        <a class="topbar-link" href="#agendar">Marque seu horário <span aria-hidden="true">↗</span></a>
+      </div>
     </header>
 
     <main>
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow"><span></span> BARBEARIA • DESDE 2016</p>
-          <h1>Seu tempo.<br /><em>Seu estilo.</em></h1>
+          <p class="eyebrow"><span></span> BEM-VINDO AO ATELIÊ DA BARBEARIA</p>
+          <h1>Corte com<br /><em>personalidade.</em></h1>
           <p class="hero-description">
-            Um bom corte começa com um bom horário. Escolha o serviço, encontre
-            seu barbeiro e deixe o resto com a gente.
+            Escolha seu corte, conheça quem vai atender você e reserve seu
+            horário sem complicação.
           </p>
-          <a class="button button-light" href="#agendar">Encontrar um horário <span aria-hidden="true">↓</span></a>
-          <p class="hero-note">SEG–SÁB &nbsp;·&nbsp; 9H ÀS 19H</p>
+          <a class="button button-light" href="#agendar">Agende seu horário <span aria-hidden="true">↓</span></a>
         </div>
         <div class="hero-art" role="img" aria-label="Ilustração de ferramentas de barbearia">
           <div class="art-circle"></div>
@@ -35,13 +40,13 @@
           <svg class="razor" viewBox="0 0 220 440" fill="none" aria-hidden="true">
             <path d="M55 37 172 154 144 182 27 65 55 37Z" fill="#C7A66A"/>
             <path d="m28 64 117 118-21 21L7 86l21-22Z" fill="#E6D2A8"/>
-            <path d="m121 198 26-26 20 20-26 26-20-20Z" fill="#59715E"/>
-            <path d="m140 218 25-25 43 43-25 25-43-43Z" fill="#A7B09A"/>
+            <path d="m121 198 26-26 20 20-26 26-20-20Z" fill="#E84232"/>
+            <path d="m140 218 25-25 43 43-25 25-43-43Z" fill="#F1B84B"/>
             <path d="m182 260 25-25-9 165-17 17 1-157Z" fill="#E6D2A8"/>
             <path d="m198 235 17 17-9 148-8-3 6-149-6-13Z" fill="#C7A66A"/>
-            <path d="M28 64 55 37" stroke="#17241E" stroke-width="3"/>
-            <path d="m7 86 21-22" stroke="#17241E" stroke-width="3"/>
-            <circle cx="128" cy="202" r="5" fill="#17241E"/>
+            <path d="M28 64 55 37" stroke="#151413" stroke-width="3"/>
+            <path d="m7 86 21-22" stroke="#151413" stroke-width="3"/>
+            <circle cx="128" cy="202" r="5" fill="#151413"/>
           </svg>
           <span class="art-number">01 / 03</span>
         </div>
@@ -58,23 +63,55 @@
           <form id="booking-form" class="booking-card">
             <div class="form-heading">
               <span class="step-number">01</span>
-              <div><h3>Seus dados</h3><p>Para confirmarmos seu horário.</p></div>
+              <div><h3>Seus dados</h3><p>Para confirmar a reserva.</p></div>
             </div>
             <label for="customer-name">Nome completo</label>
             <input id="customer-name" name="customerName" autocomplete="name" placeholder="Como podemos te chamar?" required minlength="2" maxlength="100" />
             <label for="customer-email">E-mail</label>
-            <input id="customer-email" name="customerEmail" type="email" autocomplete="email" placeholder="voce@exemplo.com" required maxlength="254" />
+            <input id="customer-email" name="customerEmail" type="email" autocomplete="email" placeholder="voce@exemplo.com" aria-describedby="email-error" required maxlength="254" />
+            <p id="email-error" class="email-error" role="alert"></p>
 
             <div class="form-heading form-heading-spaced">
               <span class="step-number">02</span>
               <div><h3>Seu atendimento</h3><p>Um serviço e um profissional.</p></div>
             </div>
-            <label for="service">Serviço</label>
-            <select id="service" name="serviceId" required><option value="">Carregando serviços...</option></select>
-            <label for="professional">Barbeiro</label>
-            <select id="professional" name="professionalId" required><option value="">Carregando profissionais...</option></select>
-            <label for="appointment-date">Dia</label>
-            <input id="appointment-date" name="date" type="date" required />
+            <label for="service-trigger">Escolha o serviço</label>
+            <div class="service-picker">
+              <input id="service" type="hidden" value="" />
+              <button id="service-trigger" class="service-trigger" type="button" aria-expanded="false" aria-controls="service-options">
+                <span id="selected-service-label">Carregando serviços...</span>
+                <span class="picker-arrow" aria-hidden="true">⌄</span>
+              </button>
+              <div id="service-options" class="service-options" role="listbox" aria-label="Serviços disponíveis" hidden></div>
+            </div>
+            <fieldset class="professional-fieldset">
+              <legend>Escolha o barbeiro</legend>
+              <div id="professional-options" class="professional-options" role="radiogroup" aria-label="Barbeiros disponíveis">
+                <p class="slots-hint">Carregando barbeiros...</p>
+              </div>
+            </fieldset>
+            <label for="date-trigger">Dia do corte</label>
+            <input id="appointment-date" name="date" type="hidden" />
+            <div class="date-picker">
+              <button id="date-trigger" class="date-trigger" type="button" aria-expanded="false" aria-controls="date-calendar">
+                <span class="date-display">
+                  <span id="selected-weekday" class="selected-weekday">Escolha um dia</span>
+                  <strong id="selected-date" class="selected-date">Carregando calendário…</strong>
+                </span>
+                <svg class="calendar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v4m10-4v4M4 9h16M5 4h14a1 1 0 0 1 1 1v14H4V5a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 13h2v2H8zm5 0h2v2h-2zM8 17h2v2H8z" fill="currentColor"/></svg>
+              </button>
+              <div id="date-calendar" class="date-calendar" hidden>
+                <div class="calendar-heading">
+                  <button id="previous-month" class="calendar-nav" type="button" aria-label="Mês anterior">‹</button>
+                  <strong id="calendar-month"></strong>
+                  <button id="next-month" class="calendar-nav" type="button" aria-label="Próximo mês">›</button>
+                </div>
+                <div class="calendar-grid calendar-weekdays" aria-hidden="true">
+                  <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
+                </div>
+                <div id="calendar-days" class="calendar-grid calendar-days" role="grid" aria-label="Dias do mês"></div>
+              </div>
+            </div>
             <div class="available-heading">
               <label>Horários disponíveis</label>
               <span>SEG–SÁB · 9H–19H</span>
@@ -88,25 +125,62 @@
           </form>
 
           <aside class="booking-aside">
-            <div class="aside-note">
-              <span class="quote-mark">“</span>
-              <blockquote>Um corte bem feito não muda quem você é. Só mostra melhor.</blockquote>
-              <p>RAFAEL MENDES <span>·</span> FUNDADOR</p>
-            </div>
-            <div class="service-note">
-              <p class="eyebrow eyebrow-dark">NA CASA</p>
-              <h3>Bom papo.<br />Café passado.<br /><em>Trabalho bem feito.</em></h3>
-              <p>Se precisar mudar ou cancelar, entre em contato com a barbearia.</p>
+            <div class="shop-info">
+              <p class="eyebrow eyebrow-dark"><span></span> FUNCIONAMENTO</p>
+              <h3>Horário de atendimento</h3>
+              <div class="hours-card">
+                <span>SEGUNDA A SÁBADO</span>
+                <strong>9h às 19h</strong>
+              </div>
+              <p class="shop-info-note">Selecione o serviço e o profissional para ver os horários disponíveis.</p>
+              <a class="whatsapp-booking" href="https://wa.me/5535999999999?text=Ol%C3%A1%21%20Quero%20marcar%20um%20hor%C3%A1rio%20na%20barbearia." target="_blank" rel="noreferrer">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.7a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.5-4.9a8.4 8.4 0 1 1 16-3.9ZM8.4 7.8c-.2-.5-.4-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.1 1.1-1.1 2.6s1.1 3 1.2 3.2c.2.2 2.1 3.4 5.2 4.6 2.6 1 3.1.8 3.7.8.6-.1 1.9-.8 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.4l-2-1c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.4.3-.7.1-.4-.2-1.4-.5-2.6-1.6-1-.8-1.6-1.8-1.8-2.1-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-.9-2Z"/></svg>
+                Prefere marcar pelo WhatsApp?
+              </a>
+              <p class="demo-contact-note">Número fictício para demonstração.</p>
             </div>
           </aside>
         </div>
       </section>
+
+      <section class="cuts-section" id="cortes">
+        <div class="cuts-heading">
+          <div>
+            <p class="eyebrow"><span></span> REFERÊNCIAS</p>
+            <h2>Ideias para<br /><em>o próximo corte.</em></h2>
+          </div>
+          <p>Alguns estilos para você salvar e mostrar ao barbeiro. O resultado pode variar conforme o cabelo e o acabamento escolhido.</p>
+        </div>
+        <div class="cuts-gallery">
+          <article class="cut-card">
+            <img src="/images/mid-fade-03.jpg" alt="Corte masculino curto com degradê nas laterais, visto de perfil" loading="lazy" />
+            <div class="cut-card-caption">
+              <span>01 / CORTE CURTO</span>
+              <h3>Curto clássico</h3>
+            </div>
+          </article>
+          <article class="cut-card">
+            <img src="/images/mid-fade-04.jpg" alt="Corte curto texturizado com degradê marcado nas laterais" loading="lazy" />
+            <div class="cut-card-caption">
+              <span>02 / TEXTURA</span>
+              <h3>Degradê com textura</h3>
+            </div>
+          </article>
+        </div>
+        <p class="image-credits">
+          Fotos de referência em licença CC0, de <a href="https://commons.wikimedia.org/wiki/User:Classic_Barbers" target="_blank" rel="noreferrer">Classic Barbers</a> via
+          <a href="https://commons.wikimedia.org/wiki/File:Mid-fade_03.jpg" target="_blank" rel="noreferrer">Wikimedia Commons (corte curto)</a> e
+          <a href="https://commons.wikimedia.org/wiki/File:Mid-fade_04.jpg" target="_blank" rel="noreferrer">Wikimedia Commons (degradê)</a>
+          (<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">Creative Commons Zero</a>).
+        </p>
+      </section>
     </main>
 
     <footer>
-      <a class="brand brand-footer" href="/"><span class="brand-mark">A</span><span>ATELIÊ <strong>BARBEARIA</strong></span></a>
-      <p>Um bom corte, sem pressa.</p>
-      <span>© ATELIÊ BARBEARIA</span>
+      <a class="brand brand-footer" href="/" aria-label="Ateliê Barbearia — início"><img class="brand-logo" src="/images/logo-barbearia.svg" alt="" /><span>ATELIÊ <strong>BARBEARIA</strong></span></a>
+      <p>SEG–SÁB · 9H–19H</p>
+      <a class="footer-phone" href="tel:+5535999999999">(35) 99999-9999 <span>· Número fictício</span></a>
+      <span>© 2026 ATELIÊ BARBEARIA</span>
     </footer>
   </body>
 </html>

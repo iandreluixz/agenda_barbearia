@@ -25,6 +25,9 @@ O projeto também pode enviar uma confirmação de agendamento e um lembrete por
 - Validação do agendamento pela API e no banco de dados.
 - Prevenção de horários sobrepostos, inclusive quando duas pessoas reservam ao mesmo tempo.
 - Confirmação de agendamento e lembrete automático por e-mail.
+- Galeria de cortes com imagens CC0 e cartões de barbeiros com fotos identificadas como ilustrativas.
+- Calendário próprio em português, contato demonstrativo pelo WhatsApp e imagens de referência com rostos desfocados.
+- Abertura com fundo fotográfico enviado como referência pelo usuário, sobreposição escura e desfoque suave.
 - Serviços e barbeiros de exemplo para facilitar a configuração inicial.
 
 ## Tecnologias
@@ -219,6 +222,8 @@ Esta versão resolve o fluxo público de agendamento, mas ainda não é uma plat
 - Pagamentos online.
 
 Os serviços, os barbeiros e os horários de funcionamento precisam ser ajustados no código ou diretamente no banco de dados. Antes de usar em um estabelecimento real, combine com o barbeiro suas regras de atendimento, cancelamento e disponibilidade.
+
+As fotos de referência da galeria vêm do Wikimedia Commons sob CC0; os links e créditos estão junto às imagens no site. Os rostos nas referências foram desfocados para a apresentação. Os cartões de barbeiros usam ilustrações fictícias e não representam os profissionais cadastrados. O telefone exibido no rodapé e os links do WhatsApp são demonstrativos; troque-os por um número autorizado antes de publicar.
 
 ## Antes de publicar para clientes
 
