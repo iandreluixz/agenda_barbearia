@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17241e" />
+    <title>Agenda — Barbearia</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Agenda da barbearia">
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <span>ATELIÊ <strong>BARBEARIA</strong></span>
+      </a>
+      <a class="topbar-link" href="#agendar">Marque seu horário <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> BARBEARIA • DESDE 2016</p>
+          <h1>Seu tempo.<br /><em>Seu estilo.</em></h1>
+          <p class="hero-description">
+            Um bom corte começa com um bom horário. Escolha o serviço, encontre
+            seu barbeiro e deixe o resto com a gente.
+          </p>
+          <a class="button button-light" href="#agendar">Encontrar um horário <span aria-hidden="true">↓</span></a>
+          <p class="hero-note">SEG–SÁB &nbsp;·&nbsp; 9H ÀS 19H</p>
+        </div>
+        <div class="hero-art" role="img" aria-label="Ilustração de ferramentas de barbearia">
+          <div class="art-circle"></div>
+          <div class="art-label">CORTE COM<br />PERSONALIDADE</div>
+          <svg class="razor" viewBox="0 0 220 440" fill="none" aria-hidden="true">
+            <path d="M55 37 172 154 144 182 27 65 55 37Z" fill="#C7A66A"/>
+            <path d="m28 64 117 118-21 21L7 86l21-22Z" fill="#E6D2A8"/>
+            <path d="m121 198 26-26 20 20-26 26-20-20Z" fill="#59715E"/>
+            <path d="m140 218 25-25 43 43-25 25-43-43Z" fill="#A7B09A"/>
+            <path d="m182 260 25-25-9 165-17 17 1-157Z" fill="#E6D2A8"/>
+            <path d="m198 235 17 17-9 148-8-3 6-149-6-13Z" fill="#C7A66A"/>
+            <path d="M28 64 55 37" stroke="#17241E" stroke-width="3"/>
+            <path d="m7 86 21-22" stroke="#17241E" stroke-width="3"/>
+            <circle cx="128" cy="202" r="5" fill="#17241E"/>
+          </svg>
+          <span class="art-number">01 / 03</span>
+        </div>
+      </section>
+
+      <section class="booking-section" id="agendar">
+        <div class="section-heading">
+          <p class="eyebrow eyebrow-dark"><span></span> AGENDAMENTO ONLINE</p>
+          <h2>Reserve sua <em>cadeira.</em></h2>
+          <p>Sem ligação, sem espera. Escolha quando fica melhor para você.</p>
+        </div>
+
+        <div class="booking-layout">
+          <form id="booking-form" class="booking-card">
+            <div class="form-heading">
+              <span class="step-number">01</span>
+              <div><h3>Seus dados</h3><p>Para confirmarmos seu horário.</p></div>
+            </div>
+            <label for="customer-name">Nome completo</label>
+            <input id="customer-name" name="customerName" autocomplete="name" placeholder="Como podemos te chamar?" required minlength="2" maxlength="100" />
+            <label for="customer-email">E-mail</label>
+            <input id="customer-email" name="customerEmail" type="email" autocomplete="email" placeholder="voce@exemplo.com" required maxlength="254" />
+
+            <div class="form-heading form-heading-spaced">
+              <span class="step-number">02</span>
+              <div><h3>Seu atendimento</h3><p>Um serviço e um profissional.</p></div>
+            </div>
+            <label for="service">Serviço</label>
+            <select id="service" name="serviceId" required><option value="">Carregando serviços...</option></select>
+            <label for="professional">Barbeiro</label>
+            <select id="professional" name="professionalId" required><option value="">Carregando profissionais...</option></select>
+            <label for="appointment-date">Dia</label>
+            <input id="appointment-date" name="date" type="date" required />
+            <div class="available-heading">
+              <label>Horários disponíveis</label>
+              <span>SEG–SÁB · 9H–19H</span>
+            </div>
+            <div id="time-slots" class="time-slots" aria-live="polite">
+              <p class="slots-hint">Escolha o serviço, o barbeiro e o dia.</p>
+            </div>
+            <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+            <button class="button button-dark submit-button" type="submit">Confirmar agendamento <span aria-hidden="true">↗</span></button>
+            <p class="privacy-note">Seus dados são usados somente para cuidar do seu agendamento.</p>
+          </form>
+
+          <aside class="booking-aside">
+            <div class="aside-note">
+              <span class="quote-mark">“</span>
+              <blockquote>Um corte bem feito não muda quem você é. Só mostra melhor.</blockquote>
+              <p>RAFAEL MENDES <span>·</span> FUNDADOR</p>
+            </div>
+            <div class="service-note">
+              <p class="eyebrow eyebrow-dark">NA CASA</p>
+              <h3>Bom papo.<br />Café passado.<br /><em>Trabalho bem feito.</em></h3>
+              <p>Se precisar mudar ou cancelar, entre em contato com a barbearia.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand brand-footer" href="/"><span class="brand-mark">A</span><span>ATELIÊ <strong>BARBEARIA</strong></span></a>
+      <p>Um bom corte, sem pressa.</p>
+      <span>© ATELIÊ BARBEARIA</span>
+    </footer>
+  </body>
+</html>

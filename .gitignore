@@ -1,0 +1,10 @@
+node_modules/
+dist/
+
+# Senhas e chaves secretas
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
