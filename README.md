@@ -1,123 +1,140 @@
 <div align="center">
 
-# Ateliê Barbearia
+# ✂️ Ateliê Barbearia
 
-**Um bom corte começa com um bom horário.**
+### Seu próximo corte começa com um horário marcado.
 
-Uma agenda online para encontrar um serviço, escolher o barbeiro e reservar um horário — com confirmação por e-mail e proteção contra reservas duplicadas.
+Uma página de agendamento para barbearia, com serviços, profissionais, escolha de data e horário, confirmação por e-mail e proteção contra reservas simultâneas.
 
-Feito com **Node.js**, **TypeScript**, **Express** e **PostgreSQL**.
+**Node.js · TypeScript · Express · PostgreSQL**
 
 </div>
 
 ---
 
-## Sobre o projeto
+## 📌 Índice
 
-O Ateliê Barbearia é uma aplicação web de agendamento para uma barbearia. O cliente informa seus dados, escolhe um serviço, um profissional, a data e um horário disponível. A aplicação valida a reserva e o banco de dados garante que dois clientes não consigam ocupar o mesmo horário com o mesmo profissional.
+- [💈 Sobre o projeto](#-sobre-o-projeto)
+- [✨ Funcionalidades](#-funcionalidades)
+- [🧰 Tecnologias](#-tecnologias)
+- [⚙️ Como executar](#️-como-executar)
+- [📧 Configurar e-mail com Resend](#-configurar-e-mail-com-resend)
+- [🛡️ Agendamentos simultâneos](#️-agendamentos-simultâneos)
+- [🔌 API](#-api)
+- [🗃️ Banco de dados](#️-banco-de-dados)
+- [🧪 Testes e compilação](#-testes-e-compilação)
+- [🗂️ Estrutura do projeto](#️-estrutura-do-projeto)
+- [🚀 Antes de publicar](#-antes-de-publicar)
 
-O projeto também pode enviar uma confirmação de agendamento e um lembrete por e-mail usando SMTP — configurado aqui para funcionar com o Resend.
+## 💈 Sobre o projeto
 
-## O que já funciona
+O **Ateliê Barbearia** é um sistema web em português para clientes conhecerem os serviços, escolherem um barbeiro e reservarem um horário online. A aplicação valida as regras do negócio e usa uma restrição no PostgreSQL para impedir que duas reservas confirmadas ocupem horários sobrepostos do mesmo profissional.
 
-- Página de agendamento responsiva, em português.
-- Consulta dos serviços, barbeiros e horários ocupados.
-- Validação do agendamento pela API e no banco de dados.
-- Prevenção de horários sobrepostos, inclusive quando duas pessoas reservam ao mesmo tempo.
-- Confirmação de agendamento e lembrete automático por e-mail.
-- Galeria de cortes com imagens CC0 e cartões de barbeiros com fotos identificadas como ilustrativas.
-- Calendário próprio em português, contato demonstrativo pelo WhatsApp e imagens de referência com rostos desfocados.
-- Abertura com fundo fotográfico enviado como referência pelo usuário, sobreposição escura e desfoque suave.
-- Serviços e barbeiros de exemplo para facilitar a configuração inicial.
+O projeto foi pensado como uma base funcional para uma barbearia. Os serviços, preços, profissionais e contatos incluídos são demonstrativos e devem ser ajustados antes de receber clientes reais.
 
-## Tecnologias
+## ✨ Funcionalidades
 
-| Parte | Tecnologia |
+### 🖥️ Experiência do cliente
+
+- Layout responsivo para desktop e celular.
+- Identidade visual de barbearia, com preto predominante, detalhes em vermelho e dourado e tipografia Barlow.
+- Abertura com imagem de fundo, sobreposição escura e desfoque suave.
+- Entrada animada e sequencial das frases e do botão; as animações respeitam a preferência do dispositivo por movimento reduzido.
+- Formulário com tipografia ampliada para facilitar a leitura.
+- Serviços com duração e preço, profissionais com ilustrações fictícias e calendário em português.
+- Consulta de horários disponíveis conforme o serviço, o profissional e o dia escolhidos.
+- Validação do e-mail e mensagens de retorno no formulário.
+- Atalhos demonstrativos de WhatsApp e telefone.
+- Galeria de estilos de corte com imagens CC0 e rostos desfocados.
+
+### ⚙️ Regras e comunicação
+
+- API em Express com validação dos dados usando Zod.
+- Horário de funcionamento de segunda a sábado, das 9h às 19h, no fuso configurado.
+- Confirmação de reserva e lembrete automático por e-mail via SMTP/Resend.
+- Restrição no PostgreSQL para evitar conflitos de horário, inclusive em requisições simultâneas.
+
+## 🧰 Tecnologias
+
+| Área | Tecnologia |
 | --- | --- |
 | Servidor e API | Node.js, TypeScript e Express |
-| Banco de dados | PostgreSQL |
-| Validação de dados | Zod |
-| E-mail | Nodemailer e SMTP |
+| Persistência | PostgreSQL |
+| Validação de entrada | Zod |
+| E-mail | Nodemailer e SMTP (Resend) |
 | Interface | HTML, CSS e JavaScript |
 | Testes | Node.js Test Runner e `tsx` |
 
-## Como funciona a proteção contra conflitos
+## ⚙️ Como executar
 
-Antes de salvar uma reserva, a API calcula o horário de término a partir da duração do serviço. Além de validar os dados e o horário de funcionamento, o PostgreSQL aplica uma restrição de exclusão que proíbe intervalos sobrepostos para o mesmo barbeiro.
-
-Essa proteção acontece no próprio banco, então continua valendo mesmo quando duas requisições chegam praticamente ao mesmo tempo. A reserva que não puder ser feita recebe `409 Conflict`, e a interface pede que o cliente escolha outro horário.
-
-Os intervalos seguem o padrão **[início, fim)**: um atendimento pode começar exatamente quando o anterior termina.
-
-## Requisitos
+### 1. Requisitos
 
 - Node.js 20 ou mais recente.
 - PostgreSQL 14 ou mais recente.
-- Um banco PostgreSQL e um usuário com permissão para criar tabelas e a extensão `btree_gist`.
-- Uma chave de API e um remetente verificado no Resend, caso queira enviar e-mails.
+- Um banco de dados PostgreSQL e um usuário com permissão para criar tabelas e a extensão `btree_gist`.
 
-## Instalação
+### 2. Instale as dependências
 
-### 1. Obtenha o projeto e instale as dependências
-
-Abra um terminal na pasta do projeto:
+Na pasta do projeto, execute:
 
 ```bash
 npm install
 ```
 
-### 2. Crie o banco
+### 3. Crie o banco PostgreSQL
 
-No pgAdmin, crie um banco chamado `agenda_barbearia`.
+No pgAdmin ou por outro cliente PostgreSQL, crie um banco chamado `agenda_barbearia`.
 
-### 3. Configure o ambiente
+### 4. Configure as variáveis de ambiente
 
-Copie `.env.example` para `.env`, na mesma pasta do `package.json`. No Windows, por exemplo, você pode usar:
+Copie o arquivo de exemplo para `.env`, na mesma pasta do `package.json`. No PowerShell do Windows:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Abra `.env` e atualize os valores da conexão PostgreSQL. O usuário, a senha e o endereço de exemplo não são necessariamente os mesmos da sua instalação:
+Edite o `.env` e informe os dados corretos do seu PostgreSQL:
 
 ```env
 PORT=3000
-DATABASE_URL=postgres://USUARIO:SENHA@localhost:5432/agenda_barbearia
+DATABASE_URL=postgresql://USUARIO:SENHA@localhost:5432/agenda_barbearia
 BUSINESS_TIME_ZONE=America/Sao_Paulo
 ```
 
-### 4. Crie as tabelas e os dados de demonstração
+Troque `USUARIO` e `SENHA` pelas credenciais locais do PostgreSQL. Não compartilhe nem envie seu `.env` ao GitHub: esse arquivo contém credenciais. O `.gitignore` já está configurado para ignorá-lo.
+
+### 5. Prepare as tabelas e os dados iniciais
 
 ```bash
 npm run db:setup
 ```
 
-Esse comando executa [`database/schema.sql`](./database/schema.sql), cria as tabelas e a restrição contra conflitos e inclui serviços e barbeiros iniciais. O banco precisa existir antes de executar o comando.
+O comando executa [`database/schema.sql`](./database/schema.sql), cria as tabelas e a regra de proteção contra conflitos, além de incluir serviços e profissionais demonstrativos. O banco precisa existir antes de executar a configuração.
 
-### 5. Inicie a aplicação
+### 6. Inicie o sistema
 
-Para desenvolvimento:
+Em desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-Abra <http://localhost:3000>. Para verificar a conexão com o banco, acesse <http://localhost:3000/api/health>; uma instalação pronta responde:
+Acesse <http://localhost:3000>. Para verificar se o servidor consegue acessar o banco, abra <http://localhost:3000/api/health>. Quando estiver pronto, o endpoint retorna:
 
 ```json
 {"status":"ok"}
 ```
 
-Para compilar e iniciar a versão de produção:
+Para compilar e iniciar o servidor compilado:
 
 ```bash
 npm run build
 npm start
 ```
 
-## Configurar e-mail com Resend
+## 📧 Configurar e-mail com Resend
 
-No painel do Resend, crie uma API Key e configure um domínio verificado para poder enviar e-mails aos clientes. Adicione estas variáveis ao `.env`:
+Para enviar mensagens aos clientes, crie uma API Key no Resend e configure um domínio remetente verificado. Adicione estas variáveis ao `.env`:
 
 ```env
 SMTP_HOST=smtp.resend.com
@@ -127,23 +144,35 @@ SMTP_PASS=SUA_CHAVE_DE_API_DO_RESEND
 SMTP_FROM="Ateliê Barbearia <agenda@seudominio.com>"
 ```
 
-Substitua a chave pelo segredo gerado no Resend e o endereço do remetente por um endereço permitido pelo domínio verificado. Não use a chave de exemplo nem envie sua chave a outras pessoas.
+Substitua `SUA_CHAVE_DE_API_DO_RESEND` pela chave secreta gerada no Resend e use em `SMTP_FROM` um endereço permitido pelo domínio verificado. Nunca coloque a chave no README, no código ou em um commit.
 
-Depois de salvar o `.env`, reinicie o servidor. A confirmação é enviada quando o cliente agenda. O processo verifica a cada minuto se há agendamentos confirmados nas próximas 24 horas e envia o lembrete correspondente.
+Depois de atualizar o `.env`, reinicie o servidor. A confirmação é enviada após a criação de um agendamento. Quando o SMTP está configurado, o servidor também verifica periodicamente os agendamentos confirmados nas próximas 24 horas para enviar lembretes. Sem SMTP configurado, a aplicação continua funcionando, mas não envia e-mails.
 
-**Proteja o `.env`.** Ele contém credenciais e não deve ser enviado ao GitHub nem compartilhado. O `.gitignore` deste projeto já exclui esse arquivo do Git.
+## 🛡️ Agendamentos simultâneos
 
-## API
+A API calcula o fim do atendimento a partir da duração cadastrada para o serviço. Em seguida, o PostgreSQL aplica uma restrição de exclusão sobre os intervalos do mesmo profissional. Assim, se duas requisições concorrentes tentarem reservar horários sobrepostos, apenas uma é confirmada; a outra recebe `409 Conflict` e a interface informa que o horário não está mais disponível.
 
-As respostas e os dados enviados pela API usam JSON.
+Os intervalos usam o padrão **[início, fim)**. Por isso, um atendimento pode começar exatamente quando o anterior termina, sem ser tratado como conflito.
+
+Além da regra de concorrência, a API verifica que:
+
+- o horário escolhido está no futuro;
+- a data não é domingo;
+- todo o atendimento cabe entre 9h e 19h no fuso `BUSINESS_TIME_ZONE`;
+- o serviço e o profissional continuam ativos;
+- nome e e-mail têm formato válido.
+
+## 🔌 API
+
+As rotas usam e retornam JSON.
 
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | `GET` | `/api/health` | Verifica a conexão com o PostgreSQL. |
-| `GET` | `/api/services` | Lista os serviços ativos, com duração e preço. |
-| `GET` | `/api/professionals` | Lista os barbeiros ativos. |
-| `GET` | `/api/appointments?from=<ISO>&to=<ISO>&professionalId=<id>` | Consulta agendamentos que ocupam um intervalo. |
-| `POST` | `/api/appointments` | Cria um agendamento. |
+| `GET` | `/api/services` | Lista serviços ativos, com duração e preço. |
+| `GET` | `/api/professionals` | Lista profissionais ativos. |
+| `GET` | `/api/appointments?from=<ISO>&to=<ISO>&professionalId=<id>` | Consulta horários ocupados no intervalo informado. |
+| `POST` | `/api/appointments` | Valida e cria um agendamento. |
 
 Exemplo de corpo para `POST /api/appointments`:
 
@@ -157,92 +186,72 @@ Exemplo de corpo para `POST /api/appointments`:
 }
 ```
 
-Envie `startsAt` como data e hora ISO 8601 com fuso, como no exemplo. A duração é definida pelo serviço escolhido, não pelo navegador.
+`startsAt` deve ser uma data ISO 8601 com fuso horário. A duração do atendimento é obtida do serviço no banco, não do navegador.
 
-### Regras de agendamento
+## 🗃️ Banco de dados
 
-- O horário precisa estar no futuro.
-- A barbearia atende de segunda a sábado, entre 9h e 19h, considerando `BUSINESS_TIME_ZONE`.
-- O atendimento inteiro deve caber no horário de funcionamento.
-- Um barbeiro não pode ter dois agendamentos confirmados sobrepostos.
-- Serviços e barbeiros inativos não aceitam novas reservas.
-- O código de resposta `409` indica que outra reserva ocupou o horário primeiro.
+O esquema em [`database/schema.sql`](./database/schema.sql) define:
 
-## Banco de dados
+- `professionals`: profissionais e seu estado de atividade;
+- `services`: nome, duração, preço e estado de atividade;
+- `appointments`: dados do cliente, serviço, profissional, intervalo, situação e estado dos lembretes.
 
-O script [`database/schema.sql`](./database/schema.sql) define:
+Os preços são armazenados em centavos. Os horários usam `TIMESTAMPTZ`, e a restrição `appointments_no_overlap` impede intervalos confirmados sobrepostos para o mesmo profissional.
 
-- `professionals`: barbeiros e seu estado de atividade.
-- `services`: nome, duração, preço e estado de atividade.
-- `appointments`: cliente, serviço, barbeiro, horário, estado e controle dos lembretes.
+## 🧪 Testes e compilação
 
-Os preços são armazenados em centavos para evitar imprecisões de ponto flutuante. Os horários são armazenados com fuso (`TIMESTAMPTZ`).
-
-## Testes e compilação
-
-Execute os testes das regras de horário:
+Rode os testes das regras de horário e sobreposição:
 
 ```bash
 npm test
 ```
 
-Confira também a compilação TypeScript:
+Verifique a compilação TypeScript:
 
 ```bash
 npm run build
 ```
 
-## Estrutura do projeto
+## 🗂️ Estrutura do projeto
 
 ```text
 database/
-  schema.sql           Tabelas, regras de concorrência e dados de exemplo
+  schema.sql                         Esquema, restrição de concorrência e dados iniciais
 public/
-  index.html           Página de agendamento
-  styles.css           Estilos e layout responsivo
-  app.js               Consulta de disponibilidade e envio do agendamento
+  images/                             Logo, fundo, ilustrações e referências de cortes
+  index.html                          Página de agendamento
+  styles.css                          Identidade visual, animações e layout responsivo
+  app.js                              Calendário, disponibilidade e formulário
 src/
-  booking-rules.ts     Regras de horário
-  database.ts          Conexão com PostgreSQL
-  email.ts             Confirmações e lembretes
-  server.ts            API e inicialização do servidor
-  setup-database.ts    Preparação inicial do banco
+  booking-rules.ts                    Regras de horário e sobreposição
+  database.ts                         Conexão com PostgreSQL
+  email.ts                            Confirmações e lembretes por e-mail
+  server.ts                           API e inicialização do servidor
+  setup-database.ts                   Preparação inicial do banco
 tests/
-  booking-rules.test.ts
+  booking-rules.test.ts               Testes das regras de agendamento
+.env.example                          Modelo de configuração local
 ```
 
-## Limitações atuais
+## 🖼️ Imagens e contatos demonstrativos
 
-Esta versão resolve o fluxo público de agendamento, mas ainda não é uma plataforma completa de gestão. Ela não tem:
+As imagens da galeria de cortes são referências CC0 do Wikimedia Commons; a página inclui links para a origem e a licença. Os rostos das imagens de referência foram desfocados. Os cartões dos profissionais usam ilustrações SVG fictícias, não fotografias de pessoas reais. A imagem de fundo foi fornecida como referência para este projeto.
 
-- Painel administrativo protegido para gerenciar a barbearia.
-- Interface para cadastrar serviços e barbeiros ou alterar preços.
-- Cancelamento ou remarcação pela pessoa cliente.
-- Disponibilidade e horários de trabalho configuráveis por profissional.
-- Pagamentos online.
+O telefone `(35) 99999-9999` e os links do WhatsApp são fictícios. Antes de publicar, substitua-os por um número autorizado pela barbearia. Confirme também que há autorização para usar qualquer imagem ou dado real adicionado ao site.
 
-Os serviços, os barbeiros e os horários de funcionamento precisam ser ajustados no código ou diretamente no banco de dados. Antes de usar em um estabelecimento real, combine com o barbeiro suas regras de atendimento, cancelamento e disponibilidade.
+## 🚀 Antes de publicar
 
-As fotos de referência da galeria vêm do Wikimedia Commons sob CC0; os links e créditos estão junto às imagens no site. Os rostos nas referências foram desfocados para a apresentação. Os cartões de barbeiros usam ilustrações fictícias e não representam os profissionais cadastrados. O telefone exibido no rodapé e os links do WhatsApp são demonstrativos; troque-os por um número autorizado antes de publicar.
+Esta versão já pode ser executada localmente após configurar o banco e o `.env`, mas uma instalação local não deixa o site acessível aos clientes pela internet. Antes de usar comercialmente, planeje:
 
-## Antes de publicar para clientes
+- hospedagem da aplicação e banco PostgreSQL gerenciado;
+- domínio próprio e HTTPS;
+- credenciais SMTP seguras e domínio de envio verificado;
+- backups, monitoramento e procedimentos para falhas;
+- autenticação e permissões para uma futura área administrativa;
+- regras reais de funcionamento, disponibilidade, cancelamento e remarcação;
+- privacidade, retenção dos dados e obrigações aplicáveis da LGPD;
+- substituição dos serviços, profissionais, imagens e contatos demonstrativos.
 
-Para oferecer o sistema como um serviço de produção, planeje:
+### ⚠️ Limitações atuais
 
-- Hospedagem para a aplicação e PostgreSQL gerenciado.
-- Domínio próprio e HTTPS.
-- Domínio de envio verificado no Resend e tratamento de falhas de e-mail.
-- Backups e monitoramento do servidor e do banco.
-- Segurança, privacidade e atendimento às obrigações aplicáveis da LGPD.
-- Área administrativa com autenticação e permissões adequadas.
-- Testes completos com dados e horários reais do estabelecimento.
-
-> A agenda já pode ser executada localmente após a configuração do banco e do arquivo `.env`. Uma instalação local, por si só, não deixa o site acessível aos clientes pela internet.
-
----
-
-<div align="center">
-
-Feito para deixar a reserva mais simples — para quem corta e para quem agenda.
-
-</div>
+O sistema oferece o fluxo público de agendamento, mas ainda não inclui painel administrativo, cadastro de serviços pela interface, cancelamento ou remarcação pelo cliente, escala configurável por profissional ou pagamentos online. Serviços, profissionais e horários precisam ser gerenciados diretamente no banco ou ajustados no projeto.
