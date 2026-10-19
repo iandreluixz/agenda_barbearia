@@ -1,99 +1,75 @@
-<div align="center">
+# Ateliê Barbearia
 
-# ✂️ Ateliê Barbearia
+Sistema web de agendamento para barbearias. O cliente consulta serviços e profissionais, escolhe uma data e um horário disponível e envia a reserva pela página. A aplicação valida os dados no servidor e usa uma restrição do PostgreSQL para impedir reservas sobrepostas para o mesmo profissional.
 
-### Seu próximo corte começa com um horário marcado.
+O projeto também pode enviar confirmações e lembretes por e-mail usando SMTP. A interface e os dados iniciais foram preparados para demonstração e precisam ser ajustados antes de atender clientes reais.
 
-Uma página de agendamento para barbearia, com serviços, profissionais, escolha de data e horário, confirmação por e-mail e proteção contra reservas simultâneas.
+## Funcionalidades
 
-**Node.js · TypeScript · Express · PostgreSQL**
+- Página responsiva em português, servida pelo próprio Express.
+- Consulta de serviços e profissionais ativos no banco de dados.
+- Calendário em português e consulta de horários ocupados por profissional.
+- Validação dos dados no navegador e na API.
+- Regras de funcionamento: segunda a sábado, entre 9h e 19h, no fuso configurado.
+- Proteção no PostgreSQL contra dois agendamentos confirmados sobrepostos.
+- Envio opcional de confirmação e lembrete por e-mail.
+- Imagens ilustrativas e galeria de referências de cortes.
 
-</div>
+## Tecnologias
 
----
-
-## 📌 Índice
-
-- [💈 Sobre o projeto](#-sobre-o-projeto)
-- [✨ Funcionalidades](#-funcionalidades)
-- [🧰 Tecnologias](#-tecnologias)
-- [⚙️ Como executar](#️-como-executar)
-- [📧 Configurar e-mail com Resend](#-configurar-e-mail-com-resend)
-- [🛡️ Agendamentos simultâneos](#️-agendamentos-simultâneos)
-- [🔌 API](#-api)
-- [🗃️ Banco de dados](#️-banco-de-dados)
-- [🧪 Testes e compilação](#-testes-e-compilação)
-- [🗂️ Estrutura do projeto](#️-estrutura-do-projeto)
-- [🚀 Antes de publicar](#-antes-de-publicar)
-
-## 💈 Sobre o projeto
-
-O **Ateliê Barbearia** é um sistema web em português para clientes conhecerem os serviços, escolherem um barbeiro e reservarem um horário online. A aplicação valida as regras do negócio e usa uma restrição no PostgreSQL para impedir que duas reservas confirmadas ocupem horários sobrepostos do mesmo profissional.
-
-O projeto foi pensado como uma base funcional para uma barbearia. Os serviços, preços, profissionais e contatos incluídos são demonstrativos e devem ser ajustados antes de receber clientes reais.
-
-## ✨ Funcionalidades
-
-### 🖥️ Experiência do cliente
-
-- Layout responsivo para desktop e celular.
-- Identidade visual de barbearia, com preto predominante, detalhes em vermelho e dourado e tipografia Barlow.
-- Abertura com imagem de fundo, sobreposição escura e desfoque suave.
-- Entrada animada e sequencial das frases e do botão; as animações respeitam a preferência do dispositivo por movimento reduzido.
-- Formulário com tipografia ampliada para facilitar a leitura.
-- Serviços com duração e preço, profissionais com ilustrações fictícias e calendário em português.
-- Consulta de horários disponíveis conforme o serviço, o profissional e o dia escolhidos.
-- Validação do e-mail e mensagens de retorno no formulário.
-- Atalhos demonstrativos de WhatsApp e telefone.
-- Galeria de estilos de corte com imagens CC0 e rostos desfocados.
-
-### ⚙️ Regras e comunicação
-
-- API em Express com validação dos dados usando Zod.
-- Horário de funcionamento de segunda a sábado, das 9h às 19h, no fuso configurado.
-- Confirmação de reserva e lembrete automático por e-mail via SMTP/Resend.
-- Restrição no PostgreSQL para evitar conflitos de horário, inclusive em requisições simultâneas.
-
-## 🧰 Tecnologias
-
-| Área | Tecnologia |
+| Componente | Tecnologia |
 | --- | --- |
 | Servidor e API | Node.js, TypeScript e Express |
-| Persistência | PostgreSQL |
-| Validação de entrada | Zod |
-| E-mail | Nodemailer e SMTP (Resend) |
+| Banco de dados | PostgreSQL |
+| Validação | Zod |
+| E-mail | Nodemailer e SMTP |
 | Interface | HTML, CSS e JavaScript |
 | Testes | Node.js Test Runner e `tsx` |
 
-## ⚙️ Como executar
+## Arquitetura e fluxo de agendamento
 
-### 1. Requisitos
+O Express serve os arquivos estáticos de `public/` e disponibiliza a API em `/api`. A interface carrega os serviços e profissionais do banco, consulta os horários já reservados e apresenta os horários livres em intervalos de 30 minutos.
 
-- Node.js 20 ou mais recente.
-- PostgreSQL 14 ou mais recente.
-- Um banco de dados PostgreSQL e um usuário com permissão para criar tabelas e a extensão `btree_gist`.
+Quando o cliente confirma a reserva, o servidor valida nome, e-mail, identificadores e data. A duração é obtida do serviço no banco; o servidor calcula o horário final e verifica se o atendimento está no futuro e cabe no horário de funcionamento. Se os dados forem válidos, a reserva é gravada no PostgreSQL.
 
-### 2. Instale as dependências
+A consulta feita pela interface serve para mostrar a disponibilidade, mas não é a garantia final contra concorrência: outra pessoa pode reservar o mesmo horário antes do envio do formulário. A regra definitiva é aplicada pelo banco no momento da gravação.
 
-Na pasta do projeto, execute:
+### Concorrência e intervalos
 
-```bash
+A tabela `appointments` possui a restrição `appointments_no_overlap`, que impede intervalos confirmados sobrepostos para o mesmo profissional. Ela usa `tstzrange` com limites `[início, fim)` e uma constraint de exclusão GiST, habilitada pela extensão `btree_gist`.
+
+Com esse formato, um atendimento pode começar no instante em que o anterior termina. Se duas requisições concorrentes tentarem ocupar horários incompatíveis, o banco aceita uma e rejeita a outra; a API converte esse conflito em HTTP `409`.
+
+## Requisitos
+
+- Node.js 20 ou superior.
+- PostgreSQL com suporte à extensão `btree_gist`.
+- Um banco PostgreSQL já criado e um usuário com permissão para criar a extensão e as tabelas.
+- Conta e remetente verificado em um provedor SMTP, se o envio de e-mails for necessário.
+
+## Instalação e execução
+
+Os comandos abaixo usam PowerShell no Windows. Execute-os no diretório do projeto.
+
+### 1. Instalar dependências
+
+```powershell
 npm install
 ```
 
-### 3. Crie o banco PostgreSQL
+### 2. Criar o banco
 
-No pgAdmin ou por outro cliente PostgreSQL, crie um banco chamado `agenda_barbearia`.
+Crie um banco chamado `agenda_barbearia` no PostgreSQL. É possível fazer isso pelo pgAdmin ou por outro cliente PostgreSQL.
 
-### 4. Configure as variáveis de ambiente
+### 3. Configurar o ambiente
 
-Copie o arquivo de exemplo para `.env`, na mesma pasta do `package.json`. No PowerShell do Windows:
+Copie o arquivo de exemplo para `.env`:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Edite o `.env` e informe os dados corretos do seu PostgreSQL:
+Edite `.env` com a URL de conexão do seu banco:
 
 ```env
 PORT=3000
@@ -101,80 +77,64 @@ DATABASE_URL=postgresql://USUARIO:SENHA@localhost:5432/agenda_barbearia
 BUSINESS_TIME_ZONE=America/Sao_Paulo
 ```
 
-Troque `USUARIO` e `SENHA` pelas credenciais locais do PostgreSQL. Não compartilhe nem envie seu `.env` ao GitHub: esse arquivo contém credenciais. O `.gitignore` já está configurado para ignorá-lo.
+Substitua `USUARIO` e `SENHA` pelas credenciais do PostgreSQL. Se a senha contiver caracteres reservados em uma URL, codifique-os antes de usá-la em `DATABASE_URL`.
 
-### 5. Prepare as tabelas e os dados iniciais
+`DATABASE_URL` é obrigatória. `PORT` é opcional e assume `3000`; `BUSINESS_TIME_ZONE` é opcional e assume `America/Sao_Paulo`. O arquivo `.env` contém credenciais e não deve ser enviado ao GitHub. Ele já está listado no `.gitignore`.
 
-```bash
+### 4. Criar tabelas e dados iniciais
+
+```powershell
 npm run db:setup
 ```
 
-O comando executa [`database/schema.sql`](./database/schema.sql), cria as tabelas e a regra de proteção contra conflitos, além de incluir serviços e profissionais demonstrativos. O banco precisa existir antes de executar a configuração.
+O script executa `database/schema.sql`, cria a estrutura e insere os serviços e profissionais de demonstração quando ainda não existem. O banco informado em `DATABASE_URL` precisa existir antes da execução.
 
-### 6. Inicie o sistema
+### 5. Iniciar o servidor
 
-Em desenvolvimento:
+Para desenvolvimento, com reinicialização automática ao alterar arquivos TypeScript:
 
-```bash
+```powershell
 npm run dev
 ```
 
-Acesse <http://localhost:3000>. Para verificar se o servidor consegue acessar o banco, abra <http://localhost:3000/api/health>. Quando estiver pronto, o endpoint retorna:
+Acesse `http://localhost:3000`. O endpoint `http://localhost:3000/api/health` verifica a conexão com o banco e responde `{"status":"ok"}` quando a aplicação está pronta.
 
-```json
-{"status":"ok"}
-```
+Para compilar e iniciar a versão compilada:
 
-Para compilar e iniciar o servidor compilado:
-
-```bash
+```powershell
 npm run build
 npm start
 ```
 
-## 📧 Configurar e-mail com Resend
+## Configuração de e-mail
 
-Para enviar mensagens aos clientes, crie uma API Key no Resend e configure um domínio remetente verificado. Adicione estas variáveis ao `.env`:
+O envio é opcional. Para usar o Resend via SMTP, configure no `.env` os dados da conta e um remetente autorizado pelo domínio verificado:
 
 ```env
 SMTP_HOST=smtp.resend.com
 SMTP_PORT=465
 SMTP_USER=resend
-SMTP_PASS=SUA_CHAVE_DE_API_DO_RESEND
+SMTP_PASS=SUA_CHAVE_DO_RESEND
 SMTP_FROM="Ateliê Barbearia <agenda@seudominio.com>"
 ```
 
-Substitua `SUA_CHAVE_DE_API_DO_RESEND` pela chave secreta gerada no Resend e use em `SMTP_FROM` um endereço permitido pelo domínio verificado. Nunca coloque a chave no README, no código ou em um commit.
+Substitua a chave e o endereço de remetente pelos valores da sua conta. Não coloque credenciais no código, neste arquivo ou em commits. Depois de alterar `.env`, reinicie o servidor.
 
-Depois de atualizar o `.env`, reinicie o servidor. A confirmação é enviada após a criação de um agendamento. Quando o SMTP está configurado, o servidor também verifica periodicamente os agendamentos confirmados nas próximas 24 horas para enviar lembretes. Sem SMTP configurado, a aplicação continua funcionando, mas não envia e-mails.
+Quando `SMTP_HOST` e `SMTP_FROM` estão configurados, a aplicação tenta enviar uma confirmação após a reserva e verifica lembretes periodicamente. Os lembretes são destinados a reservas confirmadas que começam nas próximas 24 horas. Se o e-mail de confirmação falhar, a reserva permanece criada; a resposta informa o resultado em `confirmationSent`. Sem configuração SMTP, o agendamento continua funcionando, mas não há envio de e-mails.
 
-## 🛡️ Agendamentos simultâneos
+## API
 
-A API calcula o fim do atendimento a partir da duração cadastrada para o serviço. Em seguida, o PostgreSQL aplica uma restrição de exclusão sobre os intervalos do mesmo profissional. Assim, se duas requisições concorrentes tentarem reservar horários sobrepostos, apenas uma é confirmada; a outra recebe `409 Conflict` e a interface informa que o horário não está mais disponível.
-
-Os intervalos usam o padrão **[início, fim)**. Por isso, um atendimento pode começar exatamente quando o anterior termina, sem ser tratado como conflito.
-
-Além da regra de concorrência, a API verifica que:
-
-- o horário escolhido está no futuro;
-- a data não é domingo;
-- todo o atendimento cabe entre 9h e 19h no fuso `BUSINESS_TIME_ZONE`;
-- o serviço e o profissional continuam ativos;
-- nome e e-mail têm formato válido.
-
-## 🔌 API
-
-As rotas usam e retornam JSON.
+Todas as rotas retornam JSON.
 
 | Método | Rota | Descrição |
 | --- | --- | --- |
-| `GET` | `/api/health` | Verifica a conexão com o PostgreSQL. |
-| `GET` | `/api/services` | Lista serviços ativos, com duração e preço. |
+| `GET` | `/api/health` | Confirma que o servidor consegue consultar o PostgreSQL. |
+| `GET` | `/api/services` | Lista serviços ativos, incluindo duração e preço em centavos. |
 | `GET` | `/api/professionals` | Lista profissionais ativos. |
-| `GET` | `/api/appointments?from=<ISO>&to=<ISO>&professionalId=<id>` | Consulta horários ocupados no intervalo informado. |
+| `GET` | `/api/appointments?from=<ISO>&to=<ISO>&professionalId=<id>` | Lista intervalos confirmados que se sobrepõem ao período consultado. |
 | `POST` | `/api/appointments` | Valida e cria um agendamento. |
 
-Exemplo de corpo para `POST /api/appointments`:
+Exemplo do corpo enviado para `POST /api/appointments`:
 
 ```json
 {
@@ -186,72 +146,82 @@ Exemplo de corpo para `POST /api/appointments`:
 }
 ```
 
-`startsAt` deve ser uma data ISO 8601 com fuso horário. A duração do atendimento é obtida do serviço no banco, não do navegador.
+`startsAt` deve ser uma data ISO 8601 com fuso horário. A duração não é recebida do cliente: ela vem do serviço selecionado no banco.
 
-## 🗃️ Banco de dados
+Respostas relevantes de `POST /api/appointments`:
 
-O esquema em [`database/schema.sql`](./database/schema.sql) define:
+- `201 Created`: agendamento criado; inclui os horários de início e fim e `confirmationSent`.
+- `400 Bad Request`: dados inválidos, horário passado ou regra de funcionamento violada.
+- `404 Not Found`: serviço ou profissional inexistente ou inativo.
+- `409 Conflict`: outro agendamento confirmado ocupa parte do intervalo para o mesmo profissional.
 
-- `professionals`: profissionais e seu estado de atividade;
-- `services`: nome, duração, preço e estado de atividade;
-- `appointments`: dados do cliente, serviço, profissional, intervalo, situação e estado dos lembretes.
+Erros de validação incluem uma mensagem e detalhes por campo. Os demais erros são registrados no servidor e retornam uma mensagem genérica.
 
-Os preços são armazenados em centavos. Os horários usam `TIMESTAMPTZ`, e a restrição `appointments_no_overlap` impede intervalos confirmados sobrepostos para o mesmo profissional.
+## Banco de dados
 
-## 🧪 Testes e compilação
+O esquema em `database/schema.sql` define três tabelas:
 
-Rode os testes das regras de horário e sobreposição:
+- `professionals`: nome e estado de atividade do profissional;
+- `services`: nome, duração em minutos, preço em centavos e estado de atividade;
+- `appointments`: cliente, referências ao serviço e profissional, intervalo, estado da reserva e controle dos lembretes.
 
-```bash
+Os horários são armazenados como `TIMESTAMPTZ`. A duração e o preço dos serviços de demonstração estão no script SQL; o preço é armazenado em centavos. Uma reserva tem estado `confirmed` ou `cancelled`, embora o fluxo atual da interface não ofereça cancelamento.
+
+Em uma instalação vazia, o esquema inclui estes dados de exemplo:
+
+| Serviço | Duração | Preço |
+| --- | ---: | ---: |
+| Corte | 30 minutos | R$ 40,00 |
+| Barba | 30 minutos | R$ 30,00 |
+| Corte + barba | 60 minutos | R$ 65,00 |
+
+Os profissionais iniciais são Rafael e Marcos. Atualize esses dados diretamente no banco antes de usar a agenda em um estabelecimento.
+
+## Testes
+
+Execute os testes unitários das regras de horário e sobreposição:
+
+```powershell
 npm test
 ```
 
-Verifique a compilação TypeScript:
+Compile o código TypeScript com verificação de tipos:
 
-```bash
+```powershell
 npm run build
 ```
 
-## 🗂️ Estrutura do projeto
+Os testes atuais verificam as regras de horário e intervalos. Eles não substituem testes de integração com um PostgreSQL real.
+
+## Estrutura do projeto
 
 ```text
 database/
-  schema.sql                         Esquema, restrição de concorrência e dados iniciais
+  schema.sql                Tabelas, restrições e dados iniciais
 public/
-  images/                             Logo, fundo, ilustrações e referências de cortes
-  index.html                          Página de agendamento
-  styles.css                          Identidade visual, animações e layout responsivo
-  app.js                              Calendário, disponibilidade e formulário
+  images/                   Logo, imagem de abertura, ilustrações e referências
+  index.html                Estrutura da página
+  styles.css                Estilos, responsividade e animações
+  app.js                    Calendário, disponibilidade e envio do formulário
 src/
-  booking-rules.ts                    Regras de horário e sobreposição
-  database.ts                         Conexão com PostgreSQL
-  email.ts                            Confirmações e lembretes por e-mail
-  server.ts                           API e inicialização do servidor
-  setup-database.ts                   Preparação inicial do banco
+  booking-rules.ts          Regras de horário e sobreposição
+  database.ts               Pool de conexões PostgreSQL
+  email.ts                  Confirmações e lembretes SMTP
+  server.ts                 API e inicialização do servidor
+  setup-database.ts         Execução do esquema inicial
 tests/
-  booking-rules.test.ts               Testes das regras de agendamento
-.env.example                          Modelo de configuração local
+  booking-rules.test.ts     Testes unitários das regras de agendamento
+.env.example                Modelo das variáveis de ambiente
 ```
 
-## 🖼️ Imagens e contatos demonstrativos
+## Imagens e dados de demonstração
 
-As imagens da galeria de cortes são referências CC0 do Wikimedia Commons; a página inclui links para a origem e a licença. Os rostos das imagens de referência foram desfocados. Os cartões dos profissionais usam ilustrações SVG fictícias, não fotografias de pessoas reais. A imagem de fundo foi fornecida como referência para este projeto.
+Os cartões de profissionais usam ilustrações fictícias. A galeria contém referências de cortes do Wikimedia Commons em licença CC0; a página apresenta os links de origem e licença, e os rostos foram desfocados. A imagem de abertura foi fornecida como referência para o projeto.
 
-O telefone `(35) 99999-9999` e os links do WhatsApp são fictícios. Antes de publicar, substitua-os por um número autorizado pela barbearia. Confirme também que há autorização para usar qualquer imagem ou dado real adicionado ao site.
+Os serviços e profissionais inseridos pelo esquema são exemplos. O telefone `(35) 99999-9999` e os links do WhatsApp também são fictícios. Substitua os contatos por números autorizados e confirme as permissões de uso de quaisquer imagens ou dados reais antes de publicar.
 
-## 🚀 Antes de publicar
+## Escopo e preparação para produção
 
-Esta versão já pode ser executada localmente após configurar o banco e o `.env`, mas uma instalação local não deixa o site acessível aos clientes pela internet. Antes de usar comercialmente, planeje:
+A aplicação implementa o fluxo público de consulta e criação de agendamentos. Ainda não possui painel administrativo, cadastro de serviços pela interface, horários de trabalho configuráveis por profissional, cancelamento ou remarcação pelo cliente ou pagamentos online. Alterações de serviços e profissionais são feitas diretamente no banco.
 
-- hospedagem da aplicação e banco PostgreSQL gerenciado;
-- domínio próprio e HTTPS;
-- credenciais SMTP seguras e domínio de envio verificado;
-- backups, monitoramento e procedimentos para falhas;
-- autenticação e permissões para uma futura área administrativa;
-- regras reais de funcionamento, disponibilidade, cancelamento e remarcação;
-- privacidade, retenção dos dados e obrigações aplicáveis da LGPD;
-- substituição dos serviços, profissionais, imagens e contatos demonstrativos.
-
-### ⚠️ Limitações atuais
-
-O sistema oferece o fluxo público de agendamento, mas ainda não inclui painel administrativo, cadastro de serviços pela interface, cancelamento ou remarcação pelo cliente, escala configurável por profissional ou pagamentos online. Serviços, profissionais e horários precisam ser gerenciados diretamente no banco ou ajustados no projeto.
+Executar localmente não publica o site na internet. Para atender clientes, será necessário preparar hospedagem para a aplicação e o PostgreSQL, domínio e HTTPS, backups, monitoramento e credenciais seguras. Avalie também autenticação para funções administrativas, política de privacidade, tratamento dos dados pessoais e obrigações aplicáveis da LGPD.
